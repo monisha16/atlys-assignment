@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import AtlysModal from 'src/components/AtlysModal';
 import Card from 'src/components/Card';
@@ -11,6 +12,7 @@ import commentIcon from 'src/assets/comment.svg';
 import moreMenuIcon from 'src/assets/more_menu.svg';
 
 const HomePage = () => {
+  const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [newPost, setNewPost] = useState('');
   const [showLogin, setShowLogin] = useState(true);
@@ -30,15 +32,76 @@ const HomePage = () => {
     }
   };
 
+  const handleLoginSubmit = ({ e, user }) => {
+    e.preventDefault();
+
+    const atlysUsersInLS = JSON.parse(localStorage.getItem('atlysUsers')) || [];
+
+    const userExists = atlysUsersInLS.filter(
+      (userInLS) =>
+        userInLS.email === user.userInfo || userInLS.username === user.userInfo
+    );
+
+    // const isValidPass = userExists[0].password === user.password;
+
+    if (userExists.length === 0) {
+      // setMessage("User doesn't exists! Please Register.");
+      setShowLogin((prev) => !prev);
+    } else {
+      sessionStorage.setItem('loggedInUser', JSON.stringify(userExists[0]));
+      navigate('/home', { state: { user: userExists[0] } });
+      setShowAuthModal((prev) => !prev);
+    }
+  };
+
+  const handleRegisterSubmit = ({ e, user }) => {
+    const { email, username, password } = user;
+    e.preventDefault();
+
+    const atlysUser = {
+      email: email,
+      username: username,
+      password: password,
+    };
+
+    let atlysUsersInLS = JSON.parse(localStorage.getItem('atlysUsers')) || [];
+
+    const userExists = atlysUsersInLS.filter(
+      (user) => user.email === email || user.username === username
+    );
+
+    if (userExists.length > 0) {
+      // setMessage('User already exists!');
+      setShowLogin((prev) => !prev);
+    } else {
+      atlysUsersInLS.push(atlysUser);
+      localStorage.setItem('atlysUsers', JSON.stringify(atlysUsersInLS));
+      sessionStorage.setItem('loggedInUser', JSON.stringify(atlysUser));
+      // setMessage('User registered successfully!');
+      setShowAuthModal((prev) => !prev);
+      navigate('/home', { state: { user: atlysUser } });
+    }
+  };
+
   const renderAuthChild = () => {
     if (showLogin) {
-      return <Login setShowLogin={setShowLogin} />;
+      return (
+        <Login
+          setShowLogin={setShowLogin}
+          handleLoginSubmit={handleLoginSubmit}
+        />
+      );
     }
-    return <Register setShowLogin={setShowLogin} />;
+    return (
+      <Register
+        setShowLogin={setShowLogin}
+        handleRegisterSubmit={handleRegisterSubmit}
+      />
+    );
   };
 
   return (
-    <div className='flex flex-col my-[69px] mx-auto w-full items-center'>
+    <div className='flex flex-col h-full mt-[69px] mx-auto w-full items-center'>
       <div className='flex flex-col gap-10'>
         <div className='w-full max-w-[580px]'>
           <h1 className='mb-3 text-h1 font-medium text-gray-light leading-none'>
@@ -50,7 +113,7 @@ const HomePage = () => {
           </p>
         </div>
 
-        <div className='flex flex-col max-w-[700px] gap-4'>
+        <div className='flex flex-col max-w-[700px] gap-4 mb-[69px]'>
           <Card>
             <span className='text-lg font-medium text-gray-light'>
               Create post
