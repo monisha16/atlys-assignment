@@ -1,10 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Logo from 'src/assets/login-logo.svg';
 import Login from '../components/Login';
 import Register from 'src/components/Register';
 
 const AuthPage = () => {
+  const navigate = useNavigate();
   const [showLogin, setShowLogin] = useState(true);
+
+  useEffect(() => {
+    const loggedInUser =
+      JSON.parse(sessionStorage.getItem('loggedInUser')) || null;
+    if (loggedInUser) {
+      navigate('/home', { state: { user: loggedInUser } });
+    }
+  }, []);
 
   return (
     <div className='h-full w-full flex flex-col justify-center items-center gap-12'>
