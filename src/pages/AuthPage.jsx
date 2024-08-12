@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Logo from 'src/assets/login-logo.svg';
+import useToast from 'src/hooks/useToast';
+
 import Login from '../components/Login';
 import Register from 'src/components/Register';
 
+import Logo from 'src/assets/login-logo.svg';
+
 const AuthPage = () => {
   const navigate = useNavigate();
+  const { ToastComponent, triggerToast } = useToast();
+
   const [showLogin, setShowLogin] = useState(true);
 
   useEffect(() => {
@@ -26,10 +31,12 @@ const AuthPage = () => {
         userInLS.email === user.userInfo || userInLS.username === user.userInfo
     );
 
-    // const isValidPass = userExists[0].password === user.password;
-
     if (userExists.length === 0) {
-      // setMessage("User doesn't exists! Please Register.");
+      triggerToast({
+        type: 'warning',
+        message: "User doesn't exists! Please Register.",
+        duration: 3000,
+      });
       setShowLogin((prev) => !prev);
     } else {
       sessionStorage.setItem('loggedInUser', JSON.stringify(userExists[0]));
@@ -54,19 +61,28 @@ const AuthPage = () => {
     );
 
     if (userExists.length > 0) {
-      // setMessage('User already exists!');
+      triggerToast({
+        type: 'warning',
+        message: 'User already exists!',
+        duration: 3000,
+      });
       setShowLogin((prev) => !prev);
     } else {
       atlysUsersInLS.push(atlysUser);
       localStorage.setItem('atlysUsers', JSON.stringify(atlysUsersInLS));
       sessionStorage.setItem('loggedInUser', JSON.stringify(atlysUser));
-      // setMessage('User registered successfully!');
+      triggerToast({
+        type: 'success',
+        message: 'User registered successfully!',
+        duration: 3000,
+      });
       navigate('/home', { state: { user: atlysUser } });
     }
   };
 
   return (
     <div className='h-full w-full flex flex-col justify-center items-center gap-12'>
+      {ToastComponent}
       <img src={Logo} alt='logo' />
 
       <div className='p-0.5 rounded-[10px] bg-gradient-to-br from-[#969696] to-[#343434]'>

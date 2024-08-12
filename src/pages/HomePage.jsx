@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import useToast from 'src/hooks/useToast';
 
 import AtlysModal from 'src/components/AtlysModal';
 import Card from 'src/components/Card';
@@ -13,12 +14,15 @@ import moreMenuIcon from 'src/assets/more_menu.svg';
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const { ToastComponent, triggerToast } = useToast();
+
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [newPost, setNewPost] = useState('');
   const [showLogin, setShowLogin] = useState(true);
   const loggedInUser = sessionStorage.getItem('loggedInUser') || null;
 
-  const user = loggedInUser?.username;
+  const user = loggedInUser?.username || state?.user?.username;
   const userName = user ? user.charAt(0).toUpperCase() + user.slice(1) : '';
 
   const handlePostChange = (e) => {
@@ -42,10 +46,12 @@ const HomePage = () => {
         userInLS.email === user.userInfo || userInLS.username === user.userInfo
     );
 
-    // const isValidPass = userExists[0].password === user.password;
-
     if (userExists.length === 0) {
-      // setMessage("User doesn't exists! Please Register.");
+      triggerToast({
+        type: 'warning',
+        message: "User doesn't exists! Please Register.",
+        duration: 3000,
+      });
       setShowLogin((prev) => !prev);
     } else {
       sessionStorage.setItem('loggedInUser', JSON.stringify(userExists[0]));
@@ -71,13 +77,23 @@ const HomePage = () => {
     );
 
     if (userExists.length > 0) {
-      // setMessage('User already exists!');
+      triggerToast({
+        type: 'warning',
+        message: 'User already exists!',
+        duration: 3000,
+      });
       setShowLogin((prev) => !prev);
     } else {
       atlysUsersInLS.push(atlysUser);
       localStorage.setItem('atlysUsers', JSON.stringify(atlysUsersInLS));
       sessionStorage.setItem('loggedInUser', JSON.stringify(atlysUser));
-      // setMessage('User registered successfully!');
+
+      triggerToast({
+        type: 'success',
+        message: 'User registered successfully!',
+        duration: 3000,
+      });
+
       setShowAuthModal((prev) => !prev);
       navigate('/home', { state: { user: atlysUser } });
     }
@@ -102,6 +118,7 @@ const HomePage = () => {
 
   return (
     <div className='flex flex-col h-full mt-[69px] mx-auto w-full items-center'>
+      {ToastComponent}
       <div className='flex flex-col gap-10'>
         <div className='w-full max-w-[580px]'>
           <h1 className='mb-3 text-h1 font-medium text-gray-light leading-none'>
@@ -191,11 +208,12 @@ const HomePage = () => {
         </div>
       </div>
 
-      {showAuthModal && (
-        <AtlysModal setShowAuthModal={setShowAuthModal}>
-          {renderAuthChild()}
-        </AtlysModal>
-      )}
+      <AtlysModal
+        showAuthModal={showAuthModal}
+        setShowAuthModal={setShowAuthModal}
+      >
+        {renderAuthChild()}
+      </AtlysModal>
     </div>
   );
 };

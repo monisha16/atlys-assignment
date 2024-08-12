@@ -11,7 +11,6 @@ const LoginScreen = (props) => {
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(true);
-  // const [message, setMessage] = useState('');
 
   return (
     <div>
