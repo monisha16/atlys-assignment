@@ -1,9 +1,11 @@
 // import React from 'react';
 
-const AtlysModal = () => {
+const AtlysModal = (props) => {
+  const { children } = props;
+
   return (
-    <div>
-      <div></div>
+    <div className='relative blur-sm bg-black'>
+      <div>{children}</div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Arrow from 'src/assets/arrow_back.svg';
 import ClosedEyeLogo from 'src/assets/closed_eye.svg';
@@ -7,14 +8,28 @@ import EyeLogo from 'src/assets/eye.svg';
 
 const LoginScreen = (props) => {
   const { setShowLogin } = props;
-  const [email, setEmail] = useState('');
+  const navigate = useNavigate();
+
+  const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(true);
+  const [message, setMessage] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Email:', email);
-    console.log('Password:', password);
+
+    const atlysUsersInLS = JSON.parse(localStorage.getItem('atlysUsers')) || [];
+
+    const userExists = atlysUsersInLS.filter(
+      (userInLS) => userInLS.email === user || userInLS.username === user
+    );
+
+    if (userExists.length === 0) {
+      setMessage("User doesn't exists! Please Register.");
+      setShowLogin((prev) => !prev);
+    } else {
+      navigate('/home', { state: { user: userExists[0] } });
+    }
   };
 
   return (
@@ -26,56 +41,17 @@ const LoginScreen = (props) => {
         </span>
       </div>
 
-      {/* <div className='flex flex-col gap-4'>
-        <div className='flex flex-col'>
-          <span className='text-sm text-gray-light'>Email or Username</span>
-          <span className='border-[1.5px] border-charcoal-medium rounded p-3 min-w-[415px] text-gray-medium mt-[10px]'>
-            Enter your email or username
-          </span>
-        </div>
-
-        <div>
-          <div className='flex justify-between items-baseline'>
-            <span className='text-sm text-gray-light'>Password</span>
-            <span className='text-xs text-gray-light  hover:cursor-pointer'>
-              Forgot password?
-            </span>
-          </div>
-
-          <div className='border-[1.5px] border-charcoal-medium rounded p-3 min-w-[415px] text-gray-medium mt-[10px] flex justify-between items-center'>
-            <span>Enter your password </span>
-            <img src={EyeLogo} alt='show' className='hover:cursor-pointer' />
-          </div>
-        </div>
-
-        <div className='flex flex-col justify-center'>
-          <div className='flex items-center justify-center rounded-[4px] bg-[#4A96FF] p-3 mb-3'>
-            Login
-          </div>
-
-          <span
-            onClick={() => setShowLogin((prev) => !prev)}
-            className='flex text-sm items-baseline text-gray-medium hover:cursor-pointer'
-          >
-            Not registered yet?
-            <span className='text-gray-light flex items-center'>
-              &nbsp;Register&nbsp;
-              <img src={Arrow} className='rotate-180 w-4' />
-            </span>
-          </span>
-        </div>
-      </div> */}
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <div>
-          <label htmlFor='email' className='block text-sm text-gray-light mb-2'>
+          <label htmlFor='user' className='block text-sm text-gray-light mb-2'>
             Email or Username
           </label>
           <input
-            type='email'
-            id='email'
+            type='text'
+            id='user'
             placeholder='Enter your email or username'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={user}
+            onChange={(e) => setUser(e.target.value)}
             className='h-[43px] border-[1.5px] border-charcoal-medium rounded p-3 min-w-[415px] w-full text-gray-medium !bg-transparent outline-none placeholder:font-light placeholder:text-gray-medium'
             required
             autoComplete='off'

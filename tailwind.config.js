@@ -23,7 +23,7 @@ export default {
           '1rem',
           {
             fontWeight: '400',
-            lineHeight: '19.36px',
+            lineHeight: '24px',
             letterSpacing: '0.4px',
           },
         ],
@@ -49,6 +49,14 @@ export default {
             fontWeight: '400',
             lineHeight: '21.78px',
             letterSpacing: '0.4px',
+          },
+        ],
+        h1: [
+          '1.75rem',
+          {
+            fontWeight: '400',
+            lineHeight: '33.89px',
+            letterSpacing: '0.8px',
           },
         ],
       },

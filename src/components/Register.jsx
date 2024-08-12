@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Arrow from 'src/assets/arrow_back.svg';
 import ClosedEyeLogo from 'src/assets/closed_eye.svg';
@@ -7,16 +8,43 @@ import EyeLogo from 'src/assets/eye.svg';
 
 const RegisterScreen = (props) => {
   const { setShowLogin } = props;
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(true);
+  const [message, setMessage] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Email:', email);
-    console.log('Password:', password);
-    console.log('userName', username);
+
+    const atlysUser = {
+      email: email,
+      username: username,
+      password: password,
+    };
+
+    let atlysUsersInLS = JSON.parse(localStorage.getItem('atlysUsers')) || [];
+
+    const userExists = atlysUsersInLS.filter(
+      (user) => user.email === email || user.username === username
+    );
+
+    if (userExists.length > 0) {
+      setMessage('User already exists!');
+      setShowLogin((prev) => !prev);
+    } else {
+      atlysUsersInLS.push(atlysUser);
+      localStorage.setItem('atlysUsers', JSON.stringify(atlysUsersInLS));
+
+      setMessage('User registered successfully!');
+      navigate('/home', { state: { user: atlysUser } });
+    }
+
+    setEmail('');
+    setUsername('');
+    setPassword('');
   };
 
   return (
