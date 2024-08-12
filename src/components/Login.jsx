@@ -1,36 +1,17 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import Arrow from 'src/assets/arrow_back.svg';
 import ClosedEyeLogo from 'src/assets/closed_eye.svg';
 import EyeLogo from 'src/assets/eye.svg';
 
 const LoginScreen = (props) => {
-  const { setShowLogin } = props;
-  const navigate = useNavigate();
+  const { setShowLogin, handleLoginSubmit = () => {} } = props;
 
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(true);
-  const [message, setMessage] = useState('');
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const atlysUsersInLS = JSON.parse(localStorage.getItem('atlysUsers')) || [];
-
-    const userExists = atlysUsersInLS.filter(
-      (userInLS) => userInLS.email === user || userInLS.username === user
-    );
-
-    if (userExists.length === 0) {
-      setMessage("User doesn't exists! Please Register.");
-      setShowLogin((prev) => !prev);
-    } else {
-      navigate('/home', { state: { user: userExists[0] } });
-    }
-  };
+  // const [message, setMessage] = useState('');
 
   return (
     <div>
@@ -41,7 +22,12 @@ const LoginScreen = (props) => {
         </span>
       </div>
 
-      <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+      <form
+        onSubmit={(e) =>
+          handleLoginSubmit({ e, user: { userInfo: user, password } })
+        }
+        className='flex flex-col gap-4'
+      >
         <div>
           <label htmlFor='user' className='block text-sm text-gray-light mb-2'>
             Email or Username
@@ -124,6 +110,7 @@ const LoginScreen = (props) => {
 
 LoginScreen.propTypes = {
   setShowLogin: PropTypes.func,
+  handleLoginSubmit: PropTypes.func,
 };
 
 export default LoginScreen;

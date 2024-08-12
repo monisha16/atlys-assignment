@@ -1,51 +1,17 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import Arrow from 'src/assets/arrow_back.svg';
 import ClosedEyeLogo from 'src/assets/closed_eye.svg';
 import EyeLogo from 'src/assets/eye.svg';
 
 const RegisterScreen = (props) => {
-  const { setShowLogin } = props;
-  const navigate = useNavigate();
+  const { setShowLogin, handleRegisterSubmit = () => {} } = props;
 
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(true);
-  const [message, setMessage] = useState('');
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const atlysUser = {
-      email: email,
-      username: username,
-      password: password,
-    };
-
-    let atlysUsersInLS = JSON.parse(localStorage.getItem('atlysUsers')) || [];
-
-    const userExists = atlysUsersInLS.filter(
-      (user) => user.email === email || user.username === username
-    );
-
-    if (userExists.length > 0) {
-      setMessage('User already exists!');
-      setShowLogin((prev) => !prev);
-    } else {
-      atlysUsersInLS.push(atlysUser);
-      localStorage.setItem('atlysUsers', JSON.stringify(atlysUsersInLS));
-
-      setMessage('User registered successfully!');
-      navigate('/home', { state: { user: atlysUser } });
-    }
-
-    setEmail('');
-    setUsername('');
-    setPassword('');
-  };
 
   return (
     <div>
@@ -56,7 +22,12 @@ const RegisterScreen = (props) => {
         </span>
       </div>
 
-      <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+      <form
+        onSubmit={(e) =>
+          handleRegisterSubmit({ e, user: { username, email, password } })
+        }
+        className='flex flex-col gap-4'
+      >
         <div>
           <label htmlFor='email' className='block text-sm text-gray-light mb-2'>
             Email
@@ -158,6 +129,7 @@ const RegisterScreen = (props) => {
 
 RegisterScreen.propTypes = {
   setShowLogin: PropTypes.func,
+  handleRegisterSubmit: PropTypes.func,
 };
 
 export default RegisterScreen;

@@ -1,37 +1,45 @@
-import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import AtlysModal from 'src/components/AtlysModal';
+import { useState } from 'react';
 
-import userIcon from 'src/assets/user.svg';
-import commentIcon from 'src/assets/comment.svg';
-import moreMenuIcon from 'src/assets/moreMenu.svg';
+import AtlysModal from 'src/components/AtlysModal';
 import Card from 'src/components/Card';
+import Login from '../components/Login';
+import Register from 'src/components/Register';
+
 import { posts } from 'src/data/userPosts';
 
+import commentIcon from 'src/assets/comment.svg';
+import moreMenuIcon from 'src/assets/more_menu.svg';
+
 const HomePage = () => {
-  const { state } = useLocation();
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [newComment, setNewComment] = useState('');
-  const user = state?.user?.username;
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [newPost, setNewPost] = useState('');
+  const [showLogin, setShowLogin] = useState(true);
+  const loggedInUser = sessionStorage.getItem('loggedInUser') || null;
+
+  const user = loggedInUser?.username;
   const userName = user ? user.charAt(0).toUpperCase() + user.slice(1) : '';
 
-  useEffect(() => {
-    if (location === null) {
-      setShowLoginModal(true);
-    }
-  }, []);
-
-  const handleNewComment = (e) => {
+  const handlePostChange = (e) => {
     e.preventDefault();
-    setNewComment(e.target.value);
+    setNewPost(e.target.value);
+  };
+
+  const handleNewPost = () => {
+    if (!loggedInUser) {
+      setShowAuthModal((prev) => !prev);
+    }
+  };
+
+  const renderAuthChild = () => {
+    if (showLogin) {
+      return <Login setShowLogin={setShowLogin} />;
+    }
+    return <Register setShowLogin={setShowLogin} />;
   };
 
   return (
     <div className='flex flex-col my-[69px] mx-auto w-full items-center'>
       <div className='flex flex-col gap-10'>
-        <div className='absolute right-2 top-2 w-full flex justify-end '>
-          <img src={userIcon} alt='userIcon' />
-        </div>
         <div className='w-full max-w-[580px]'>
           <h1 className='mb-3 text-h1 font-medium text-gray-light leading-none'>
             Hello {userName}
@@ -56,14 +64,17 @@ const HomePage = () => {
                 type='textfield'
                 className='p-3 w-full text-gray-light !bg-charcoal outline-none placeholder:font-light
                placeholder:text-gray-medium'
-                value={newComment}
-                onChange={handleNewComment}
+                value={newPost}
+                onChange={handlePostChange}
                 placeholder='How are you feeling today?'
               />
             </div>
 
             <div className='w-full flex justify-end'>
-              <div className='rounded bg-blue-light py-3 px-[38px] cursor-pointer text-center text-white leading-none outline-none hover:bg-blue-light/80 focus:bg-blue-light/80 disabled:cursor-not-allowed disabled:bg-blue-light/50'>
+              <div
+                onClick={handleNewPost}
+                className='rounded bg-blue-light py-3 px-[38px] cursor-pointer text-center text-white leading-none outline-none hover:bg-blue-light/80 focus:bg-blue-light/80 disabled:cursor-not-allowed disabled:bg-blue-light/50'
+              >
                 Post
               </div>
             </div>
@@ -117,7 +128,11 @@ const HomePage = () => {
         </div>
       </div>
 
-      {showLoginModal && <AtlysModal />}
+      {showAuthModal && (
+        <AtlysModal setShowAuthModal={setShowAuthModal}>
+          {renderAuthChild()}
+        </AtlysModal>
+      )}
     </div>
   );
 };
